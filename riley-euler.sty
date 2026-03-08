@@ -1,0 +1,17 @@
+\ProvidesPackage{riley-euler}
+%https://tex.stackexchange.com/questions/103983/how-do-i-use-ams-euler
+\usepackage[euler-digits,euler-hat-accent]{eulervm}
+\definecolor{product-color}{gray}{.3}
+\definecolor{sum-color}{gray}{.38}
+\definecolor{int-color}{gray}{.2}
+
+%\def\italictheoremhook{\let\oldeverymath=\everymath \let\everymath{\oldeverymath\/}}
+% for italic corrections that only apply when euler is used
+\def\euleritcorrect{\/}
+% why doesn't it have this defined :C
+ \newcommand{\dot}[1]{\overset{.}#1}
+ \newcommand{\ddot}[1]{\overset{..}#1}
+ \newcommand{\bar}{\overline}
+
+\let\oldepsilon\epsilon
+\def\epsilon{\varepsilon}

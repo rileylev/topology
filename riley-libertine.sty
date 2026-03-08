@@ -1,0 +1,22 @@
+\ProvidesPackage{riley-libertine}
+% will this make ugly math commands
+%\usepackage{euler}
+%fontspec
+\usepackage{fontspec}
+\setmainfont[Ligatures={Common,Required,TeX},Numbers=OldStyle]{Libertinus Serif}
+\setsansfont[Numbers=OldStyle]{Libertinus Sans}
+\setmonofont{Inconsolata}
+
+
+\usepackage{riley-euler}
+
+% koma
+\setkomafont{section}{\LARGE\normalfont\sffamily\color[gray]{.32}}
+\setkomafont{subsection}{\Large\normalfont\sffamily\color[gray]{.2}}
+\setkomafont{subsubsection}{\large\normalfont\sffamily\color[gray]{.24}}
+
+
+
+\renewcommand{\labelitemi}{\color[gray]{.3}\textbullet}
+
+%TODO: make big integrals gray

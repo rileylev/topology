@@ -1,0 +1,695 @@
+\documentclass[a5paper]{scrbook}
+\usepackage{riley}
+\usepackage{riley-libertine}
+
+\usepackage{svg}
+
+\setkomafont{partnumber}{\Huge\normalfont\rmfamily\color[gray]{.2}}
+\setkomafont{part}{\Huge\normalfont\rmfamily\color[gray]{.2}}
+\setkomafont{chapter}{\Huge\normalfont\rmfamily\color[gray]{.38}}
+
+\def\book#1{\textit{#1}}
+
+\SetProtrusion[load=default]{font=*}{%
+      {„}={1000,1000},
+      {‟}={1000,1000},
+  {.}={,1000}, {,}={,1000}, {-} = {,1000} , {;}={,900}, {:}={,900}, {?}={,400}, {\textquotedblleft} = {900,900}, {\textquotedblright}={900,900}, {\textquoteleft} = {1000,},{\textquoteright}={,1000} }
+
+\def\todo#1{\message{TODO: #1}}
+
+\usepackage[hyperref=true]{biblatex}
+\addbibresource{bib.bib}
+\setcounter{biburllcpenalty}{1000}
+
+
+\usepackage{tikz}
+\usetikzlibrary{cd, arrows.meta}
+% https://tex.stackexchange.com/questions/494540/format-links-text-in-the-bibliography-to-be-exactly-like-other-links
+\appto{\bibsetup}{\urlstyle{tt}}
+
+\let\oldamp\&
+% \def\&{\textit{\oldamp}}
+
+\let\oldbullet\bullet
+\def\bullet{{\color{gray}\oldbullet}}
+
+\newcommand{\gray}[1]{{\color{gray}#1}}
+\newcommand{\black}[1]{{\color{black}#1}}
+
+\newcommand{\gparen}[1]{\left .\!{\gray{\paren{\black{#1}}}}\!\right.}
+
+\newcommand{\marginnote}[1]{\normalmarginpar\marginpar{\tiny\sffamily\raggedright #1}}
+\newcommand{\revmarginnote}[1]{\reversemarginpar\marginpar{\tiny\sffamily\raggedleft #1}}
+
+
+\let\oldimplies\implies
+\def\implies{\color{gray}\oldimplies\color{black}}
+\let\oldiff\iff
+\def\iff{\color{gray}\oldiff\color{black}}
+
+\newcounter{exercisectr}
+\newtheorem{exercise}[exercisectr]{Exercise}
+
+\def\tilde{\widetilde}
+
+%https://tex.stackexchange.com/questions/161788/how-to-have-upside-down-text-in-body
+\def\hint#1{\par{}Hint:\hfill\tiny\rotatebox[origin=c]{180}{%
+    \begin{minipage}{.6\linewidth}#1\end{minipage}}}
+
+\undef\interior
+\DeclareMathOperator{\interior}{int}
+\DeclareMathOperator{\cl}{cl}
+
+\def\nhood{{\mathcal N}}
+\def\nhoodbase{{\mathcal {B}}}
+\def\ball{B}
+
+
+\begin{document}
+Topology has a lot of different branches, but there's two big ones: point-set topology and the other kinds. Point-set topology is a general framework for making sense of continuity and convergence. It's foundational and useful, but not usually what you picture when you hear topology. I'll start with that, but also try to touch the other branches. 
+\part{Point-set topology}
+\chapter{What is a topology?}
+\section{Why}
+The goal here is to pin down what convergence and continuity mean, and what data we need to impose on a plain set to make convergence and continuity make sense. Trying to generalize or abstract a notion can bring clarity. In this case there are also more practical reasons. For functions between real numbers or finite-dimensional real spaces, you can get by fine with the ordinary notions of convergence and continuity. But for convergence of sequences of functions and continuity of higher order functions, the situation is more nuanced, and we need a language to support expressing that nuance. 
+
+\begin{example}[Curve length is discontinuous?]
+  It's tempting to say curve length, a higher-order function, is continuous. Perturbing a curve by a small amount wouldn't change its length by all that much. Similarly, it's tempting to say a sequence of functions converges if it converges at every point. But these two notions are in tension.
+
+  Construct the sequence of curves \(\gamma_n:[0,1]\to\R^2\) by starting with \(\gamma_0\) tracing out the square connecting the points \((1,1), (-1,1), (-1,-1), (1,-1)\);
+  and \(\gamma_{n+1}\) folds in the corners of \(\gamma_n\) until they touch the unit circle:
+  \[
+    \begin{matrix}
+      \begin{tikzpicture}
+        \draw (0,1) coordinate[label=above:\(\gamma_0\)];
+        \draw[gray] (0,0) circle (1);
+        \draw (-1,-1) rectangle (1,1);
+      \end{tikzpicture}
+      \
+      \begin{tikzpicture}
+        \draw (0,1) coordinate[label=above:\(\gamma_1\)];
+        \draw[gray] (0,0) circle (1);
+        \draw[lightgray] (-1,-1) rectangle (1,1);
+        \draw (1,0) -- (1,.7) -- (.7,.7) -- (.7,1) -- (0,1); 
+        \draw (1,-0) -- (1,-.7) -- (.7,-.7) -- (.7,-1) -- (0,-1); 
+        \draw (-1,-0) -- (-1,-.7) -- (-.7,-.7) -- (-.7,-1) -- (0,-1); 
+        \draw (-1,0) -- (-1,.7) -- (-.7,.7) -- (-.7,1) -- (0,1); 
+      \end{tikzpicture}
+      \
+      \begin{tikzpicture}
+        \draw (0,1) coordinate[label=above:\(\gamma_2\)];
+        \draw[gray] (0,0) circle (1);
+        \draw[lightgray] (1,0) -- (1,.7) -- (.7,.7) -- (.7,1) -- (0,1); 
+        \draw[lightgray] (1,-0) -- (1,-.7) -- (.7,-.7) -- (.7,-1) -- (0,-1); 
+        \draw[lightgray] (-1,-0) -- (-1,-.7) -- (-.7,-.7) -- (-.7,-1) -- (0,-1); 
+        \draw[lightgray] (-1,0) -- (-1,.7) -- (-.7,.7) -- (-.7,1) -- (0,1); 
+        % 
+        \draw (1,0) -- (1,.5) --(.86,.5) -- (.86,.7) -- (.7,.7) -- (.7,.86) -- (.5,.86) -- (.5,1) --(0,1); 
+        \draw (1,-0) -- (1,-.5) --(.86,-.5) -- (.86,-.7) -- (.7,-.7) -- (.7,-.86) -- (.5,-.86) -- (.5,-1) --(0,-1); 
+        \draw (-1,-0) -- (-1,-.5) --(-.86,-.5) -- (-.86,-.7) -- (-.7,-.7) -- (-.7,-.86) -- (-.5,-.86) -- (-.5,-1) --(0,-1); 
+        \draw (-1,0) --  (-1,.5) -- (-.86,.5) --  (-.86,.7) --  (-.7,.7) --  (-.7,.86) --  (-.5,.86) --  (-.5,1) --(0,1); 
+      \end{tikzpicture}
+    \end{matrix}
+    \ \ 
+    \dots
+  \]
+  The sequence \(\gamma_n\) converges to the unit circle, at least in \emph{some} sense. 
+
+  Because it traces a square with side length \(2\),
+  \[
+    \text{length}\,\gamma_0=4.
+  \]
+  Because folding in the corners does not change the perimeter,
+  \[
+    \text{length}\,\gamma_{n+1}=\text{length}\,\gamma_n  = \dots = \text{length}\,\gamma_0 = 4.
+  \]
+  Conclude
+  \[
+    \lim_{n\to \infty} \text{length}\, \gamma_n = \lim_{n\to\infty} 4
+  \]
+  but the circumference of the unit circle is \(2\pi\). Curve length is \emph{discontinuous}! Or, at least, \(\gamma_n\) doesn't converge to the unit circle `strong enough' for curve length to follow.  (I regret to inform you I first learned this paradox from a trollface meme).
+\end{example}
+
+\section{Small distances}
+To start, let's unpack continuity in the ordinary situations. 
+
+\begin{defn}[Continuous, informal]
+  A function is continuous if it keeps small distances small.
+\end{defn}
+This isn't a working definition, but it's not far off. If \(d_X\) measures distance in a set \(X\), and \(d_Y\) measures distance in a set \(Y\), 
+\begin{defn}[\(\epsilon\)-\(\delta\) continuity]\label{e-d cont}
+  A function \(f:(X,d_X)\to (Y,d_Y)\) is continuous \emph{at} \(x_0\) if, for any margin of \emph{error} \(\epsilon>0\), there is an associated \emph{distance} \(\delta\) that guarantees \(f(x)\) is within the desired margin of error of \(x_0\). Precisely, 
+  \[
+    d_Y\paren[\big]{f(x_0),f(x)} < \epsilon
+  \]
+  whenever
+  \[
+    d_Y(x_0,x) < \delta_\epsilon.
+  \]
+  In symbols,
+  \begin{align*}
+    \texttt{con}&\texttt{tinuous-at?}(f,x_0)\define\\
+    &\paren{\forall \epsilon >0}\paren{\exists \delta_\epsilon > 0}\paren{\forall x\in X} \\&\paren[\Big]{d_X(x_0,x) < \delta_\epsilon \implies d_Y\paren[\big]{f(x_0),f(x)} < \epsilon}
+  \end{align*}
+\end{defn}
+This definition has a lot of moving parts because we're describing the process/possibility of refining an approximation. 
+\[
+  \begin{matrix}
+    \begin{tikzpicture}[scale=1.2]
+      \clip (-1,-1) rectangle (2.3,2.3);
+      \def\f#1{{(#1)^2}}
+      \def\x{1}
+      \def\dx{.2}
+      \def\xl{\x-\dx}
+      \def\xr{\x+\dx}
+      \foreach\dx in {.4, .2, .055}
+      \filldraw[color=blue,opacity = .2]
+      (\xl,0) -- (\xl,\f{\xl}) -- (0,\f{\xl}) -- (0,\f{\xr})--(\xr,\f{\xr}) -- (\xr,0) -- cycle;
+      \draw (\x,0) -- (\x,\f\x) -- (0,\f\x);
+      \filldraw[blue, opacity=.3] (0,.64)-- (-.2,.64)--(-.2,\f{1.2}) -- (0,\f{1.2});
+      \draw[|-|] (-.2,.56) to[edge label=\(\epsilon\)]  (-.2,1);
+      \draw[-|] (-.2,1) to[edge label=\(\epsilon\)] (-.2,1.44);
+      \draw[font=\fontsize{7}{7}] (1,-.16) coordinate[label=center:\(x_0\)];
+      \fill (1,0) circle (.04);
+      \draw[|-] (.8,-.4) to[font=\fontsize{5}{5},edge label'=\(\delta_{\!\!\epsilon}\)] (1,-.4);
+      \draw[|-|] (1,-.4) to[font=\fontsize{5}{5},edge label'=\(\delta_{\!\!\epsilon}\)] (1.2,-.4);
+      \draw[samples={10},domain=0:2,smooth,variable=\t] plot (\t,\f{\t});
+      \draw (-1,0) -- (5,0);
+      \draw (0,-1) -- (0,5);
+    \end{tikzpicture}
+  \end{matrix}
+  \qquad
+  \abs{x_0 -x} < \delta_\epsilon \implies \abs{x_0{}^2-x^2}< \epsilon.
+\]
+
+How does this check \(f\) keeps small distances small? Because we can keep shrinking \(\epsilon\). Actually, we don't care about what happens at large epsilons. If we have a \(\delta_{\epsilon_{\text{small}}}\) that we know works for \(\epsilon_{\text{small}}\), we can just reuse it for any larger \(\epsilon_{\text{large}}\):
+  \[
+   d_X(x_0,x_1) < \delta_{\epsilon_{\text{small}}}\implies d_Y\paren[\big]{f(x_0),f(x_1)} < \epsilon_{\text{small}} < \epsilon_{\text{large}}. 
+  \]
+  You might also look at it like this: continuous functions keep infinitesimal distance infinitesimal. But---what is an infinitesimal?---we don't want to open that can of worms. So instead we use an indirection and let \(\epsilon\) and \(\delta\) vary. 
+
+  \section{Open, closed, interior, exterior}
+  We can use distance to describe continuity, but in some sense it's overkill. 
+  Continuity only requires \emph{small} distances stay small. It doesn't care about large distances, and it doesn't constrain small distances beyond that. We want to isolate just the structure continuity sees. Since there's no absolute notion of smallness, we need to adjust the approach.
+
+  Instead of trying to say if two points are close, ask if a point is close to \emph{a set}, specifically if a point \emph{touches} a set. For example,
+  \[
+    0\notin (0,1)
+  \]
+  but they \emph{are} touching. Equivalently, we can ask if a point is in the \emph{interior} of a set, in the \emph{exterior} of a set, or in the \emph{boundary}. A point \(p\) touches the set \(X\) if \(p\) is in the interior \emph{or} boundary of \(X\). We can tentatively define continuity via
+  \begin{defn}[Continuity: touching (tentative)]
+    A function \(f\) is continuous if, whenever a point \(p\) touches the set \(X\), the point \(f(p)\) touches the set \(f(X)\). 
+  \end{defn}
+  This matches the idea that a continuous function can be drawn in a single penstroke. 
+  
+  A set is \emph{open} if it is only interior, and a set is \emph{closed} if it contains its boundary. So for example, \((0,1)\) is open, \([0,1]\) is closed, and \((0,1]\) is neither. 
+
+  We could proceed by axiomatizing the touching relation, but, traditionally, point-set topology starts by axiomatizing \emph{open sets}. Then you define interior, boundary, and exterior in terms of open sets, and the touching relation follows. We will follow this tradition. 
+
+  \begin{defn}[Topology]
+    A \emph{topology}\eit/ \(\tau\) on a set \(X\) is a collection of subsets of \(X\), called the \emph{open} subsets, that satisfies
+    \begin{enumerate}
+      \item \(\emptyset, X\in \tau\)
+      \item Closed under \emph{infinite} unions: if \(I\) is any (possibly infinite) set, and for each \(i\in I\), \(U_i \in \tau\) (is open), then
+            \[
+            \bigcup_{i\in I} U_i \in \tau
+            \]
+            (is open)
+      \item Closed under \emph{finite} intersections: for all pairs of open sets \(U_0,U_1\in\tau\), their intersection
+            \[
+            U_0 \cap U_1 \in \tau
+            \]
+            is open. 
+    \end{enumerate}
+    The pair \((X,\tau)\) is called a \emph{topological space}.
+  \end{defn}
+  The asymmetry in the definition, where we allow infinite unions but finite intersections, reflects the difference between interior and exterior. Because taking unions just adds more to the set, it can't hurt the interior, only grow it. But because intersections can take away points, infinite intersections can carve away too much, leaving some formerly-interior points exposed.
+  \begin{defn}[Standard topology on \(\R\)]
+    The standard topology on \(\R\) is the set of all infinite unions of `open' intervals
+    \[
+      (a,b) \define \set{x\in \R : a < x < b}. 
+    \]
+  \end{defn}
+  
+  \begin{example}[Non-open infinite intersection]
+    Let
+    \[
+      X_n \define \paren{-\frac1n,1+\frac1n}.
+    \]
+    Then each \(X_n\) is open, but the infinite intersection
+    \[
+      \bigcap_{n=1}^{\infty} X_n = 
+      \bigcap_{n=1}^{\infty} \paren{-\frac1n,1+\frac1n} = [0,1]
+    \]
+    is closed! 
+    \[
+      \begin{tikzpicture}[scale=.8]
+        \def\N{20}
+        \def\dy{.3333333}
+        \foreach\n in {1,2,...,\N}
+        \filldraw[opacity=.3, fill=blue, fill opacity=.03]
+        (-1/\n, -7) -- 
+        (-1/\n,-\n/3)--(1+1/\n,-\n/3) -- (1+1/\n, -7) -- cycle;
+        \foreach\n in {1,2,...,\N}
+        \draw (-1,-\n/3) coordinate[label=left:\(X_{\n}\)]
+        [{Circle[open]}-{Circle[open]}] (-1/\n-.08,-\n*\dy)--(1+1/\n+.08,-\n*\dy);
+    \draw (.5,-7.7) coordinate [label=\(\vdots\)];
+    \def\bottom{-\N*\dy-1}
+        \draw (-1,\bottom) coordinate[label=left:\(\bigcap_{n=1}^\infty X_n\)] [{Circle}-{Circle}] (-.08,\bottom)  -- (1.08,\bottom);
+      \end{tikzpicture}
+    \]
+  \end{example}
+
+  It's usually easier to define a topology through \emph{basic} open sets which \emph{generate} the topology through infinite unions. 
+  \begin{defn}[Basis axioms]
+    A basis \(B\) on a set \(X\) is a collection of subsets of \(X\) such that
+    \begin{enumerate}
+      \item \(X\) is \emph{covered} by elements of \(B\)
+            \[
+            X = \bigcup_{b\in B} b
+            \]
+      \item If \(b_0,b_1\in B\), then every point in the intersection \(p\in b_0\cap b_1\) is contained in some \(b_p\) which is contained in the intersection:
+            \[
+            p\in b_p \subseteq b_0\cap b_p
+            \]
+            \[
+            \begin{tikzpicture}
+              \filldraw[dashed,  color=blue!60!black, fill opacity=.1] (0,0) circle (1);
+              \filldraw[dashed,  color=blue!60!black,fill opacity=.1] 
+              (1,0) circle (1);
+              \fill (.5,0) circle (.03);
+              \filldraw[dashed, fill opacity=.1] (.5,0) circle (.3);
+              \fill (.6,.5) circle (.02);
+              \filldraw[dotted,fill opacity=.1] (.6,.5) circle (.1);
+              \fill (.6,.7) circle (.01);
+              \filldraw[dotted, fill opacity=.1] (.6,.7) circle (.07);
+            \end{tikzpicture}
+            \]
+    \end{enumerate}
+    An element of a basis is called a \emph{basic open set} or simply a \emph{basis element}. 
+  \end{defn}
+  These are exactly the axioms that ensure the set of all infinite unions of basic open sets forms a topology. 
+  \begin{exercise}
+    Prove the set of all infinite unions of a basic open sets is a topology. 
+  \end{exercise}
+
+  The same topology can have multiple bases, which is why we have both notions. A basis is easier to work with because we don't need to consider every possible open set. But because many distinct bases describe the same topological space, we 
+  \begin{example}
+    An \emph{open ball} centered at \(c\) with radius \(r\) is the set
+    \[
+      B_c(r) \define \set{x\in X : d(c,x) < r}.
+    \]
+    The standard topology on \(\R^n\) is given by the basis of all open balls. 
+  \end{example}
+  The set of open cubes \(\set{(x,y)^n : x < y \in \R}\) is also a basis for the standard topology of \(\R^n\). 
+
+  \begin{defn}[Closed]
+    Suppose \((X,\tau)\) is a topological space. A set \(K\) is closed if its complement is open:
+    \[
+      K\text{ is closed} \iff X\setminus K \in \tau. 
+    \]
+  \end{defn}
+  By DeMorgan's law, closed sets satisfy dual axioms to open sets:
+  \begin{enumerate}
+    \item \(\emptyset,X\) are closed.
+    \item Infinite \emph{intersections} of closed sets are closed:
+          \[
+          \bigcap_{i\in I} K_i \text{ is closed }
+          \]
+    \item \emph{Finite} unions of closed sets are closed:
+          \[
+          K_0 \cup K_1 \text{ is closed. }
+          \]
+  \end{enumerate}
+
+  As promised, we can recover interior, exterior, and touching from a topology.
+  \begin{defn}
+    Suppose \((X,\tau)\) is a topological space. The \emph{interior} of a set \(A\subset X\) is the largest open set contained in \(A\):
+    \[
+      \interior A \define \sup \set{U\in \tau: U\subseteq A} = \bigcup\set{U\in\tau: U \subseteq A}
+    \]
+    The \emph{exterior} of \(A\) is the interior of \(X\setminus A\). The \emph{boundary} of \(A\), written \(\partial A\), is the set of points that are neither in the interior nor exterior. 
+    \[
+    \includesvg[width=.9\textwidth]{interior-boundary}
+    \]
+  \end{defn}
+  \begin{exercise}
+    Show \(p\in\partial A\) exactly when every open set containing \(p\) contains both a point in \(A\) and a point in \(X\setminus A\). \hint{Prove the contrapositive. Suppose \(p\) is in an open set \(U\) entirely contained in \(A\): \(p\in U \subseteq A\).}
+  \end{exercise}
+  And finally we can say a point \(p\) \emph{touches} the set \(A\) if \(p\) is in \(A\) or its boundary. Actually, that deserves a name
+  \begin{defn}[Closure]
+    The \emph{closure} of a set \(A\) in a topological space \((X,\tau)\) is
+    \[
+      \cl A\define A \cup \partial A.
+    \]
+    \[
+      \includesvg[width=.7\textwidth]{closure}
+    \]
+  \end{defn}
+  \begin{exercise}
+    Show \(\cl A\) is the smallest closed set containing \(A\).  \hint{How is \(X\setminus \cl A\) related to \(X\setminus A\)?}
+  \end{exercise}
+  A point \(p\) \emph{touches} \(A\) if \(p\in A \cup \partial A\). 
+  \begin{theorem}[Open set criterion for closure]
+    Let \((X,\tau)\) be a topological space. Suppose \(A\subseteq X\). Then
+    \[
+      p\in \cl A 
+    \]
+    exactly when every open set containing \(p\) contains a point in \(A\). 
+  \end{theorem}
+  \begin{proof}
+    Taking the  closure of \(A\) is dual to taking the interior of \(X\setminus A\):
+    \[
+      X\setminus \cl A = \interior\paren{X\setminus A}.
+    \]
+    \[
+      \begin{tikzpicture}[scale=.8]
+        \draw[lightgray] (-2,-2) rectangle (2,2);
+        \filldraw[dashed,fill=green!20] (0,0) circle (1);
+        \draw (0,0) coordinate [label=center:\(A\)];
+        {\clip (-1,0) rectangle (1,1);
+          \draw (0,0) circle (1);
+        }
+      \end{tikzpicture}
+      \ 
+      \begin{tikzpicture}[scale=.8]
+        \draw[lightgray] (-2,-2) rectangle (2,2);
+        \fill[blue!60!black,opacity=.2] (-2,-2) rectangle (2,2);
+        \draw (0,2) coordinate [label=below:\(\interior X\setminus A\)];
+        \filldraw[dashed,fill=white] (0,0) circle (1);
+      \end{tikzpicture}
+      \ 
+      \begin{tikzpicture}[scale=.8]
+        \draw[lightgray] (-2,-2) rectangle (2,2);
+        \filldraw[fill=green!20] (0,0) circle (1);
+        \draw (0,0) coordinate[label=center:\(\cl A\)];
+      \end{tikzpicture}
+    \]
+    So \(p\in\cl A\) exactly when \(p\notin \interior(X\setminus A)\).  When is \(p\in \interior\paren{X\setminus A}\)? When there's an open set \(U\) containing \(p\) but inside of \(X\setminus A\):
+    \[
+      p\in\interior\paren{X\setminus A} \iff \paren{\exists U\in\tau }\paren{ p\in U\subseteq X\setminus A}. 
+    \]
+    Negating therefore shows
+    \[
+      p\in\cl A \iff \neg\paren{\exists U\in\tau }\paren{ p\in U\subseteq X\setminus A}. 
+    \]
+    and if there does not exist such a \(U\), that means every \(U\) fails to lie inside \(X\setminus A\), \ie, every \(U\) contains a point of \(A\). Conclude
+    \[
+      p\in\cl A \iff \paren{\forall U\in T} \paren{p\in U \implies U \cap A \neq \emptyset}, 
+    \]
+    \ie, every open set containing \(p\) intersects \(A\). 
+  \end{proof}
+  Statements like `all open sets containing \(p\)' or `at least one open set containing \(p\)' are so common there's a dedicated term:
+  \begin{defn}[Neighborhood]
+    An \emph{open neighborhood} of a point \(p\) is an open set containing \(p\). A  (not necessarily open) \emph{neighborhood} of \(p\) is a set containing an open neighborhood of \(p\). 
+
+    That's still so common people abbreviate it as \emph{nhood}. 
+  \end{defn}
+  So the previous theorem can be phrased as
+  \begin{cor}[Neighborhood criterion for closure]
+    A point \(p\) is in \(\cl A\) exactly when \emph{every neighborhood} of\eit/ \(p\) contains a point of \(A\). 
+  \end{cor}
+  For example, every neighborhood of \(0\) contains a point of \((0,\infty)\):
+  \[
+    \begin{tikzpicture}
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (1);
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (.8);
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (.5);
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (.3);
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (.2);
+      \filldraw[gray,fill=blue!40, fill opacity=.2] (0,0) circle (.12);
+      \draw[{Circle[open]}->] (-0.06,0) -- (2,0);
+    \end{tikzpicture}
+  \]
+  Dually,
+  \begin{cor}[Neighborhood criterion for interior]
+    A point\eit/ \(p\) is in the interior of \(A\) exactly when there is a neighborhood of\eit/ \(p\) contained in \(A\).
+  \[
+    \begin{tikzpicture}
+      \draw (-1,-1) rectangle (1,1);
+      \draw (0,1) coordinate[label=above:\(A\)];
+      \filldraw[gray,fill=blue!40,fill opacity=.2] (0,0) circle (.8);
+      \fill (0,0) coordinate [label=below:\(p\)] circle (.04);
+    \end{tikzpicture}
+  \]
+  \end{cor}
+  \begin{example}
+    Let \((\R,\tau)\) be the real numbers with standard topology. Then, if \(\Q\) is the subset of \emph{rational} numbers, its closure is all of \(\R\)
+    \[
+      \cl\Q=\R
+    \]
+    because any open interval containing a rational number also contains an irrational number. 
+  \end{example}
+  \section{Example topologies}
+  The first two topologies we will look at are a bit silly. 
+  \begin{defn}[Trivial topology]
+    Let \(X\) be a set. The \emph{trivial topology} on \(X\) is
+    \[
+      \tau_{\text{trivial}}\define\set{\emptyset, X}. 
+    \]
+    This is the smallest possible topology on \(X\). The picture is a bunch of points stuck together, since there is only one neighborhood and it contains everything.
+    \[
+      \includesvg[width=.5\textwidth]{trivial-topology}
+    \]
+  \end{defn}
+  \begin{defn}[Discrete topology]
+    Let \(X\) be a set. The \emph{discrete topology} on \(X\) is the topology where \emph{every} set is open: 
+    \[
+      \tau_{\text{discrete}}\define 2^X. 
+    \]
+    Geometrically, the discrete topology describes isolated points, because every point \(p\) has a neighborhood \(\set p\) that contains nothing else. 
+    \[
+      \includesvg[width=.5\textwidth]{discrete-topology}
+    \]
+  \end{defn}
+  
+  An ordering induces a topology. 
+  \begin{defn}[preorder]
+    A \emph{preorder} is a binary relation \(\leq\) satisfying
+    \begin{itemize}
+      \item reflexivity: \(x\leq x\)
+      \item transitivity:
+            \[
+            x\leq y \text{ and } y\leq z \implies x\leq z. 
+            \]
+    \end{itemize}
+    Additionally, define
+    \[
+      x < y \iff x \leq y \text{ but not } y \leq x. 
+    \]
+  \end{defn}
+  \begin{defn}[Order topology]
+    Suppose \((X,\leq)\) is a set with a preorder. Define the open intervals
+    \[
+      (a,b) \define \set{x\in X: a < x < b}. 
+    \]
+    Then
+    \[
+      \set[\big]{(a,b) : a,b \in X}
+    \]
+    is a basis for \emph{the order topology}. 
+  \end{defn}
+  The order topology \(\leq\) induces on the real numbers is the standard topology on the real numbers. 
+
+  Distance also induces a topology:
+  \begin{defn}[Metric space]
+    A \emph{metric} on a set \(X\) is a function that measures the distance between points on \(X\):
+    \[
+      d: X \times X \to [0,\infty)
+    \]
+    satisfying 
+    \begin{itemize}
+      \item \(d(x,y)=0\) iff \(x=y\)
+      \item Symmetry: \(d(x,y) = d(y,x)\)
+      \item Triangle inequality:
+            \[
+            d(x,z) \leq d(x,y) + d(y,z) 
+            \qquad
+            \begin{matrix}
+              \begin{tikzpicture}
+                \draw (0,0) coordinate[label=below:\(x\)] -- (2,0) coordinate[label=below:\(z\)] -- (1.3,1) coordinate[label=\(y\)] -- cycle;
+              \end{tikzpicture}
+            \end{matrix}
+            \]
+    \end{itemize}
+    A set, together with its metric, are called a \emph{metric space}. 
+  \end{defn}
+  \begin{defn}[Metric topology]
+    A metric space has the \emph{metric topology}, whose basis is the set of open balls. 
+  \end{defn}
+  The metric topology induced by \(\abs{\,\_\,}\) on \(\R\) is also the standard topology on \(\R\). 
+
+  \begin{defn}[Cofinite topology]
+    The cofinite topology on \(X\) is the topology \(\tau_{\text{cofinite}}\) where a set \(K\subseteq X\) is closed exactly when \(K\) is finite or \(K=X\). In other words, the open sets are either all of \(X\) or \emph{cofinite}, \ie, complements of finite sets. 
+  \end{defn}
+  \begin{exercise}
+    Is the cofinite topology really a topology? Are the closed sets closed under finite unions and infinite intersections?
+  \end{exercise}
+  \section{Continuity}
+  With neighborhoods, we can adapt \nameref{e-d cont} to topological spaces:
+  \begin{defn}[Continuity: neighborhood definition]
+    Suppose \((X,\tau_X)\) and \((Y,\tau_Y)\) are topological spaces. Then the function
+    \[
+      f:X\to Y
+    \]
+    is \emph{continuous at} \(x\) if, for every neighborhood \(V\) of \(f(x)\), there is a neighborhood \(U_V\) of \(x\) that \(f\) carries \emph{inside} \(V\):
+    \(
+       f(U_V) \subseteq V. 
+    \)
+    \[
+      \includesvg[width=.7\textwidth]{nhood-continuous}
+    \]
+    In symbols, if \(\nhood_p\) is the set of neighborhoods of \(p\), 
+    \begin{align*}
+      \texttt{cont}&\texttt{inuous-at?}(f,x)\define\\
+                   &\paren{\forall V\in \nhood_{f(x)}}\paren[\big]{\exists U_V \in\nhood_{x}}\paren[\big]{f(U_V)\subseteq V}.
+    \end{align*}
+  \end{defn}
+  What we gained: generality \emph{and} improved chunking. Because we gave the neighborhood concept a name, the definition of continuity has shrunk, making it easier to hold in our heads. What we lost: simplicity of the neighborhoods under consideration. In the original definition of \nameref{e-d cont}, we only looked at \(U\) and \(V\) shaped like \emph{open balls}.
+
+  Can we recover this simplicity? Partly. The concept of a ball doesn't quite make sense in a general topological space. Without a notion of distance, we can't measure a radius, never mind check if it's constant. But, if we assume every point does have enough simple, or \emph{basic}, neighborhoods, we can recover this simplicity.  What makes a neighborhood basic? That depends on context. It depends on the space. So let's defer that decision with abstraction: 
+  \begin{defn}[neighborhood basis]
+    A \emph{neighborhood basis} at the point \(x\) is a collection \(\nhoodbase_x\) of neighborhoods, called \emph{basic neighborhoods}, such that, for every neighborhood \(N\) of \(x\), there is a basic \(U\in\nhoodbase_x\) that is at least as small: \(x\in U\subseteq N\) \cite[32]{willard}. 
+    \[
+      \includesvg[width=.3\textwidth]{nhood-basis}
+    \]
+  \end{defn}
+  \begin{example}
+    In \(\R^n\) with standard topology, the set of open balls centered at \(x\) is a neighborhood basis for \(x\).
+
+    We can be more parsimonious: the set
+    \[
+      \set[\big]{\ball_x(1/n) : n\in\N}
+    \]
+    is a neighborhood basis, as is
+    \[
+      \set{\ball_x(e^{-n}) : n \in \N }. 
+    \]
+  \end{example}
+  \begin{defn}[Continuity: neighborhood basis definition]\sloppypar
+    Suppose \((X,\tau_x)\) and \((Y,\tau_Y)\) are topological spaces. Let \(\nhoodbase_x\) be a neighborhood basis at \(x\). 
+    A function \(f:X\to Y\) is continuous at \(x\) iff, for every basic neighborhood \(V\) of \(f(x)\), there is a basic neighborhood \(U_V\) of \(x\) such that
+    \[
+      f(U_V)\subseteq V. 
+    \]
+  \end{defn}
+  
+  For continuity globally, we have a simpler criterion
+  \begin{theorem}
+    A function \(f:(X,\tau_X)\to (Y,\tau_Y)\) is continuous iff the preimage of every open set in \(\tau_Y\) is open, \ie,
+    \[
+      f^{-1}(\tau_Y) \subseteq \tau_X. 
+    \]
+
+    A function is continuous iff open sets \emph{pull back} to open sets. 
+  \end{theorem}
+  \begin{proof}
+    Suppose \(f\) is continuous at every point in \(X\).
+    Fix an open set \(V\in \tau_Y\). We need to show \(f^{-1}(V)\) is open.
+    If \(f^{-1}(V)=\emptyset\), then it is open, and we're done. Otherwise, it contains a point 
+    \(x\in f^{-1}(V)\), \ie, \(f(x)\in V\). To show \(f^{-1}(V)\) is open, it suffices to show \(x\) is in the interior of \(f^{-1}(V)\) (since \(x\) is arbitrary, this will show every point is an interior point). By hypothesis, \(f\) is continuous at \(x\). Because \(V\) is open, it is a neighborhood of \(f(x)\). By continuity, there is a neighborhood \(U\) of \(x\) whose image is inside \(V\): \(f(U)\subseteq V \). 
+    Take preimages:
+    \[
+      x\in U \subseteq f^{-1}\paren[\big]{f(U)} \subseteq f^{-1}(V),
+    \]
+    so \(x\in\interior f^{-1}(V)\). 
+
+    Suppose the preimage of every open set is open. Let \(\nhoodbase_{f(x)}\) be a neighborhood base of \emph{open} neighborhoods of \(f(x)\in Y\). Pick a \(V\in\nhoodbase_{f(x)}\). Because \(f(x)\in V\), we know \(x\) is in its preimage: \(x \in f^{-1}(V)\). By hypothesis, \(f^{-1}(V)\) is open, so it is a neighborhood of \(x\). By construction,
+    \[
+      f\paren{f^{-1}(V) } = V \subseteq V
+    \]
+    so we found a neighborhood of \(x\) that gets mapped within \(V\). Because \(V\) was arbitrary, this works for all \(V\in\nhoodbase_{f(x)}\), so \(f\) is continuous at \(x\). 
+  \end{proof}
+  This characterization of continuity helps us deduce some facts about the trivial and discrete topologies.
+  \begin{theorem}
+    Suppose \((X,\tau_X)\) is any topological space, and \((Y,\tau_{\text{trivial}})\) has trivial topology. Then any function \(f:X\to Y\) is automatically continuous. 
+  \end{theorem}
+  \begin{proof}
+    The only open sets in \(Y\) are \(\emptyset\) and \(Y\). But \(f^{-1}(\emptyset)=\emptyset\) and \(f^{-1}(Y)=X\), which are both open by definition. . 
+  \end{proof}
+  \begin{theorem}
+    Suppose \((X,\tau_{\text{discrete}})\) has discrete topology, and \((Y,\tau_Y)\) is any topological space. Then any function \(f:X\to Y\) is automatically continuous. 
+  \end{theorem}
+  \begin{proof}
+    Pick an arbitrary \(U\in\tau_Y\). Because \(U\) is arbitrary, it suffices to check \(f^{-1}(U)\) is open. But, in the discrete topology, every subset is open, so \(f^{-1}(U)\) in particular is open. 
+  \end{proof}
+  \begin{defn}[Homeomorphism]
+    A continuous function with a continuous inverse is called a homeomorphism. 
+  \end{defn}
+  If there is a homeomorphism between two topological spaces, they have \emph{the same topological structure}. This is because a homeomorphism puts the open sets of its source and destination in bijective correspondence:
+  \begin{theorem}
+    Let \((X,\tau_X)\) and \((Y,\tau_Y)\) be topological spaces. Suppose \(f:X \to Y\) is continuous and has a continuous inverse \(g:Y\to X\). Then \(f^{-1}:\tau_X\cong \tau_Y\). 
+  \end{theorem}
+  \begin{proof}
+    Because \(f\) is continuous, the function pulling back open sets to their preimages
+    \[
+      f^{-1}:V \mapsto f^{-1}(V) 
+    \]
+    maps \(\tau_Y\to\tau_X\). Likewise, because \(g\) is continuous,
+    \[
+      g^{-1}:U \mapsto g^{-1}(U) 
+    \]
+    maps \(\tau_X\to \tau_Y\). What is \(f^{-1}(g^{-1}(U))\)?  Suppose \(x\) is in the \(f\)-preimage of \(g^{-1}(U)\), \ie, \(x\in f^{-1}(g^{-1}(U))\). That means \(f(x)\in g^{-1}(U)\). By the same reasoning, this means \(g(f(x))\in U\). But because \(g\) and \(f\) are inverses, this just says \(x\in U\). Conclude
+    \[
+      f^{-1}(g^{-1}(U)) =U. 
+    \]
+    By the same argument,
+    \[
+      g^{-1}(f^{-1}(V)) = V. 
+    \]
+    Conclude the induced functions on the topologies, \(f^{-1}\) and \(g^{-1}\), are inverses, hence bijections.  
+  \end{proof}
+  Warning: A bijective continuous function's inverse need not be continuous.
+  \begin{counterex}[continuous bijection with discontinuous inverse]
+    Let \(X=\set{0,1}\). Let \(\tau_{\text{trivial}}=\set{\emptyset, X}\) be the trivial topology, and
+    \[
+      \tau_{\text{discrete}}=\set{\emptyset, \set 0, \set 1, \set{0,1}}. 
+    \]
+    Define a function \(f(x)\define x\). It is a bijection and
+    \[
+      f:(X,\tau_{\text{discrete}}) \to (X,\tau_{\text{trivial}})
+    \]
+    is continuous. But
+    \[
+      f^{-1}: (X,\tau_{\text{trivial}})\to(X,\tau_{\text{discrete}}) 
+    \]
+    is not! The preimages of singletons are not open in the discrete topology, \eg, \(f^{-1}(\set 0 )=\set 0\) is not open!
+  \end{counterex}
+  \section{Convergence}
+  \begin{defn}[Sequence]
+    A sequence in \(X\) is a function \(a:\N\to X\). For sequences, function application is usually written with a subscript:
+    \[
+      a_n \define a(n). 
+    \]
+  \end{defn}
+  Intuitively, the sequence \((a_n)\) converges to \(a\) when \(a_n\) gets arbitrarily close to \(b\) when \(n\to\infty\). If, instead of distance, we use neighborhoods, we can define convergence for any topological space.
+  \begin{defn}[Sequence convergence]
+    Let \((X,\tau)\) be a topological space. A sequence \(a:\N\to X\) \emph{converges} to a point \(b\in X\) if \(a_n\) eventually enters every neighborhood of \(b\). Explicitly, for every  \(U:\nhood_b\), there is some \(N_U\) beyond which the sequence is always in \(U\), \ie, for all \(n\geq N\), \(a_n\in U\). 
+    \begin{align*}
+      \texttt{con}&\texttt{verges-to?}(a : \N \to X ,b : \N)\define \\
+      &\paren[\big]{\forall U \in \N_b}\paren[\big]{\exists N_U\in \N}\paren[\big]{\forall (n\in\N)> N_U} \paren[\big]{a_n\in U}
+    \end{align*}
+    Convergence is abbreviated
+    \(
+      a_n \to b. 
+    \)
+    \[
+      \includesvg[width=.7\textwidth]{sequence-converge}
+    \]
+  \end{defn}
+  A similar but weaker notion is 
+  \begin{defn}[Limit point]
+    The point \(b\) is a  \emph{limit point} of the sequence \(a:\N\to X\) if every neighborhood of \(b\) contains an \(a_n\) for some \(n\). 
+  \end{defn}
+  Because this definition of convergence is purely topological, it is preserved by continuous functions:
+  \begin{theorem}
+    Suppose \(f:X \to Y\) is continuous at \(x\). Let \(x:\N\to X\) be a sequence that converges to \(y\). Then
+    \[
+      x_n\to y \implies f(x_n) \to f(y). 
+    \]
+  \end{theorem}
+  \begin{proof}
+    Because \(f\) is continuous at \(x\), every neighborhood \(V\) of \(f(x)\) contains a neighborhood of \(f(x)\) of the form \(f(U_V)\) where \(U_V\) is a neighborhood of \(x\). Because \(x_n\to y\), there is some \(N_{U_V}\) after which \(x_n\in U_V\). But then \[f(x_n) \in f(U_V) \subseteq V \quad\text{ when } N_{U_V}\leq n.\]
+    Conclude \(f(x_n)\) is eventually in \(V\). 
+  \end{proof}
+  \printbibliography
+\end{document}
