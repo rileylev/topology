@@ -292,7 +292,7 @@ How does this check \(f\) keeps small distances small? Because we can keep shrin
     Prove the set of all infinite unions of a basic open sets is a topology. 
   \end{exercise}
 
-  The same topology can have multiple bases, which is why we have both notions. A basis is easier to work with because we don't need to consider every possible open set. But because many distinct bases describe the same topological space, we 
+  The same topology can have multiple bases. A basis is often easier to work with because we don't need to consider every possible open set. But if you can define something in terms of the topology, then you know it won't depend on the choice of basis. 
   \begin{example}
     An \emph{open ball} centered at \(c\) with radius \(r\) is the set
     \[
@@ -604,7 +604,7 @@ How does this check \(f\) keeps small distances small? Because we can keep shrin
     Suppose \((X,\tau_X)\) is any topological space, and \((Y,\tau_{\text{trivial}})\) has trivial topology. Then any function \(f:X\to Y\) is automatically continuous. 
   \end{theorem}
   \begin{proof}
-    The only open sets in \(Y\) are \(\emptyset\) and \(Y\). But \(f^{-1}(\emptyset)=\emptyset\) and \(f^{-1}(Y)=X\), which are both open by definition. . 
+    The only open sets in \(Y\) are \(\emptyset\) and \(Y\). But \(f^{-1}(\emptyset)=\emptyset\) and \(f^{-1}(Y)=X\), which are both open by definition.
   \end{proof}
   \begin{theorem}
     Suppose \((X,\tau_{\text{discrete}})\) has discrete topology, and \((Y,\tau_Y)\) is any topological space. Then any function \(f:X\to Y\) is automatically continuous. 
@@ -642,7 +642,7 @@ How does this check \(f\) keeps small distances small? Because we can keep shrin
   \begin{counterex}[continuous bijection with discontinuous inverse]
     Let \(X=\set{0,1}\). Let \(\tau_{\text{trivial}}=\set{\emptyset, X}\) be the trivial topology, and
     \[
-      \tau_{\text{discrete}}=\set{\emptyset, \set 0, \set 1, \set{0,1}}. 
+      \tau_{\text{discrete}}=\set[\big]{\emptyset, \set 0, \set 1, \set{0,1}}. 
     \]
     Define a function \(f(x)\define x\). It is a bijection and
     \[
@@ -663,17 +663,17 @@ How does this check \(f\) keeps small distances small? Because we can keep shrin
   \end{defn}
   Intuitively, the sequence \((a_n)\) converges to \(a\) when \(a_n\) gets arbitrarily close to \(b\) when \(n\to\infty\). If, instead of distance, we use neighborhoods, we can define convergence for any topological space.
   \begin{defn}[Sequence convergence]
-    Let \((X,\tau)\) be a topological space. A sequence \(a:\N\to X\) \emph{converges} to a point \(b\in X\) if \(a_n\) eventually enters every neighborhood of \(b\). Explicitly, for every  \(U:\nhood_b\), there is some \(N_U\) beyond which the sequence is always in \(U\), \ie, for all \(n\geq N\), \(a_n\in U\). 
+    Let \((X,\tau)\) be a topological space. A sequence \(a:\N\to X\) \emph{converges} to a point \(b\in X\) if \(a_n\) eventually enters every neighborhood of \(b\). Explicitly, for every  \(U\in\nhood_b\), there is some \(N_U\) beyond which the sequence is always in \(U\), \ie, for all \(n\geq N\), \(a_n\in U\). 
     \begin{align*}
       \texttt{con}&\texttt{verges-to?}(a : \N \to X ,b : \N)\define \\
-      &\paren[\big]{\forall U \in \N_b}\paren[\big]{\exists N_U\in \N}\paren[\big]{\forall (n\in\N)> N_U} \paren[\big]{a_n\in U}
+      &\paren[\big]{\forall U \in \N_b}\paren[\big]{\exists N_U\in \N}\paren[\big]{\forall (n:\N)> N_U} \paren[\big]{a_n\in U}
     \end{align*}
     Convergence is abbreviated
     \(
       a_n \to b. 
     \)
     \[
-      \includesvg[width=.7\textwidth]{sequence-converge}
+      \includesvg[width=.6\textwidth]{sequence-converge}
     \]
   \end{defn}
   A similar but weaker notion is 
@@ -690,6 +690,10 @@ How does this check \(f\) keeps small distances small? Because we can keep shrin
   \begin{proof}
     Because \(f\) is continuous at \(x\), every neighborhood \(V\) of \(f(x)\) contains a neighborhood of \(f(x)\) of the form \(f(U_V)\) where \(U_V\) is a neighborhood of \(x\). Because \(x_n\to y\), there is some \(N_{U_V}\) after which \(x_n\in U_V\). But then \[f(x_n) \in f(U_V) \subseteq V \quad\text{ when } N_{U_V}\leq n.\]
     Conclude \(f(x_n)\) is eventually in \(V\). 
+    \[
+      \includesvg[width=.5\textwidth]{cont-conv}
+    \]
   \end{proof}
   \printbibliography
 \end{document}
+
